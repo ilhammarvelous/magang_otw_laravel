@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('otps', function (Blueprint $table) {
+        Schema::create('menus', function (Blueprint $table) {
             $table->id();
-            $table->string('nomor_wa');
-            $table->string('otp_code');
-            $table->timestamp('expires_at');
+            $table->string('menu')->unique()->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('otps');
+        Schema::dropIfExists('menus');
     }
 };

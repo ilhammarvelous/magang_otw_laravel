@@ -2,8 +2,13 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\MahasiswaMataKuliahController;
+use App\Http\Controllers\MataKuliahController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\PostRandomDataController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserMenuController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,5 +37,20 @@ Route::post('/user/register', [AuthController::class, 'register']);
 Route::post('/user/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/user/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-Route::apiResource('mahasiswas', MahasiswaController::class)->middleware('auth:sanctum');
-Route::post('/mahasiswa/random-data', [PostRandomDataController::class, 'postRandomData'])->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->group(function() {
+    Route::apiResource('/mahasiswas', MahasiswaController::class);
+    Route::apiResource('/mahasiswa-mata-kuliah', MahasiswaMataKuliahController::class);
+    Route::apiResource('/mata-kuliah', MataKuliahController::class);
+    Route::apiResource('/user', UserController::class);
+    Route::apiResource('/menu', MenuController::class);
+    Route::post('/mahasiswa/random-data', [PostRandomDataController::class, 'postRandomData']);
+    Route::get('/select-mhs', [MahasiswaController::class, 'select']);
+    Route::get('/select-mk', [MataKuliahController::class, 'select']);
+    Route::get('/select-user', [UserController::class, 'select']);
+    Route::get('/select-menu', [MenuController::class, 'select']);
+
+    Route::get('/users-menu', [UserMenuController::class, 'getUsers']);
+    Route::get('/menus/{userId}', [UserMenuController::class, 'getUserMenus']);
+    Route::post('/menus/{userId}', [UserMenuController::class, 'updateMenus']);
+    Route::get('/menus', [UserMenuController::class, 'getAllMenus']);
+});

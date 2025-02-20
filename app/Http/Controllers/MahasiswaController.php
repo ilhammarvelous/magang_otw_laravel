@@ -8,12 +8,9 @@ use Illuminate\Support\Facades\Crypt;
 
 class MahasiswaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $mahasiswas = Mahasiswa::paginate(5);
+        $mahasiswas = Mahasiswa::paginate(10);
 
         if ($mahasiswas->isEmpty()) {
             return response()->json([
@@ -23,19 +20,19 @@ class MahasiswaController extends Controller
             ], 200);
         }
 
-        $mahasiswas->getCollection()->transform(function ($mhs) {
-            return [
-                'id' => Crypt::encryptString($mhs->id), // 🔐 Enkripsi ID
-                'nim' => $mhs->nim,
-                'nama' => $mhs->nama,
-                'no_hp' => $mhs->no_hp,
-                'agama' => $mhs->agama,
-                'prodi' => $mhs->prodi,
-                'status' => $mhs->status,
-                'created_at' => $mhs->created_at,
-                'updated_at' => $mhs->updated_at,
-            ];
-        });
+        // $mahasiswas->getCollection()->transform(function ($mhs) {
+        //     return [
+        //         'id' => Crypt::encryptString($mhs->id), // 🔐 Enkripsi ID
+        //         'nim' => $mhs->nim,
+        //         'nama' => $mhs->nama,
+        //         'no_hp' => $mhs->no_hp,
+        //         'agama' => $mhs->agama,
+        //         'prodi' => $mhs->prodi,
+        //         'status' => $mhs->status,
+        //         'created_at' => $mhs->created_at,
+        //         'updated_at' => $mhs->updated_at,
+        //     ];
+        // });
 
         return response()->json([
             'success' => true,
@@ -44,9 +41,11 @@ class MahasiswaController extends Controller
         ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function select()
+    {
+        return response()->json(Mahasiswa::select('id', 'nama')->get());
+    }
+
     public function store(Request $request)
     {
         try {
@@ -97,14 +96,11 @@ class MahasiswaController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
-        $decrypt = Crypt::decryptString($id);
+        // $decrypt = Crypt::decryptString($id);
 
-        $mahasiswa = Mahasiswa::find($decrypt);
+        $mahasiswa = Mahasiswa::find($id);
 
         if (!$mahasiswa) {
             return response()->json([
@@ -120,14 +116,11 @@ class MahasiswaController extends Controller
         ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
-        $decrypt = Crypt::decryptString($id);
+        // $decrypt = Crypt::decryptString($id);
 
-        $mahasiswa = Mahasiswa::find($decrypt);
+        $mahasiswa = Mahasiswa::find($id);
 
         if (!$mahasiswa) {
             return response()->json([
@@ -172,25 +165,21 @@ class MahasiswaController extends Controller
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         try {
-            $decrypt = Crypt::decryptString($id);
+            // $decrypt = Crypt::decryptString($id);
 
-            $mahasiswa = Mahasiswa::find($decrypt);
+            $mahasiswa = Mahasiswa::find($id);
 
 
             if (!$mahasiswa) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Data tidak ditemukan.',
+                    'message' => 'Data mahasiswa tidak ditemukan.',
                 ], 404);
             }
 
-            // Hapus data
             $mahasiswa->delete();
 
             return response()->json([

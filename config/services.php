@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'whatsapp' => [
+        'api_url'  => env('WHATSAPP_API_URL'),
+        'app_key'  => env('WHATSAPP_APP_KEY'),
+        'auth_key' => env('WHATSAPP_AUTH_KEY'),
+    ],
 ];

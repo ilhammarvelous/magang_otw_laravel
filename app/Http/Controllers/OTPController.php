@@ -7,18 +7,10 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class OTPController extends Controller
 {
-    protected $apiUrl;
-    protected $apiKey;
-
-    public function __construct()
-    {
-        $this->apiUrl = "https://owa.gusaha.com/api/send-message";
-        $this->apiKey = env('WHATSAPP_API_KEY');
-    }
-
     public function generateOTP(Request $request)
     {
         if (!$request->user()) {
@@ -30,18 +22,22 @@ class OTPController extends Controller
 
         $user = $request->user();
 
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User tidak ditemukan.'
-            ], 400);
-        }
-
         if (!$user->no_wa) {
             return response()->json([
                 'success' => false,
                 'message' => 'Nomor WhatsApp pengguna tidak terdaftar.'
             ], 400);
+        }
+
+        $apiUrl = config('services.whatsapp.api_url', env('WHATSAPP_API_URL'));
+        $appKey = config('services.whatsapp.app_key', env('WHATSAPP_APP_KEY'));
+        $authKey = config('services.whatsapp.auth_key', env('WHATSAPP_AUTH_KEY'));
+
+        if (!$apiUrl || !$appKey || !$authKey) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Konfigurasi API WhatsApp belum lengkap. Cek file .env'
+            ], 500);
         }
 
         $otpCode = rand(100000, 999999);
@@ -58,24 +54,31 @@ class OTPController extends Controller
             $response = Http::withHeaders([
                 "Accept" => "*/*",
                 "Content-Type" => "application/json"
-            ])->post($this->apiUrl, [
-                    "api_key" => $this->apiKey,
-                    "receiver" => $user->no_wa,
-                    "data" => [
-                        "success" => true,
-                        "message" => $message
-                    ]
-                ]);
+            ])->post($apiUrl, [
+                "appkey" => $appKey,
+                "authkey" => $authKey,
+                "to" => $user->no_wa,
+                "message" => $message,
+            ]);
+
 
             if ($response->failed()) {
-                throw new Exception('Gagal mengirim OTP ke WhatsApp.');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengirim OTP ke WhatsApp.',
+                    'error' => $response->json()
+                ], 500);
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'OTP dikirim ke WhatsApp.'
+                'message' => 'OTP dikirim ke WhatsApp anda.',
+                'whatsapp_response' => $response->json()
             ], 200);
+            
         } catch (Exception $e) {
+            Log::error('Error kirim OTP: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mengirim OTP.',
@@ -95,7 +98,7 @@ class OTPController extends Controller
         if (!$otp) {
             return response()->json([
                 'success' => false,
-                'message' => 'OTP tidak ditemukan.'
+                'message' => 'OTP tidak valid.'
             ], 400);
         }
 
@@ -131,11 +134,22 @@ class OTPController extends Controller
             ], 400);
         }
 
+        $apiUrl = config('services.whatsapp.api_url', env('WHATSAPP_API_URL'));
+        $appKey = config('services.whatsapp.app_key', env('WHATSAPP_APP_KEY'));
+        $authKey = config('services.whatsapp.auth_key', env('WHATSAPP_AUTH_KEY'));
+
+        if (!$apiUrl || !$appKey || !$authKey) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Konfigurasi API WhatsApp belum lengkap. Cek file .env'
+            ], 500);
+        }
+
         if ($user->otp_code && !$user->isExpired()) {
             $otpCode = $user->otp_code;
         } else {
             $otpCode = rand(100000, 999999);
-            $expiresAt = Carbon::now()->addMinutes(2);
+            $expiresAt = Carbon::now()->addMinutes(1);
 
             $user->update([
                 'otp_code' => $otpCode,
@@ -148,12 +162,11 @@ class OTPController extends Controller
         $response = Http::withHeaders([
             "Accept" => "*/*",
             "Content-Type" => "application/json"
-        ])->post($this->apiUrl, [
-            "api_key" => $this->apiKey,
-            "receiver" => $user->no_wa,
-            "data" => [
-                "message" => $message
-            ]
+        ])->post($apiUrl, [
+            "appkey" => $appKey,
+            "authkey" => $authKey,
+            "to" => $user->no_wa,
+            "message" => $message,
         ]);
 
         if ($response->failed()) {
@@ -165,7 +178,8 @@ class OTPController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'OTP dikirim ulang ke WhatsApp.'
+            'message' => 'OTP dikirim ulang ke WhatsApp.',
+            'whatsapp_response' => $response->json()
         ], 200);
     }
 }

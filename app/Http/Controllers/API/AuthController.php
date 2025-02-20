@@ -51,7 +51,7 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Registrasi sukses',
             'data' => $user
-        ], 200);
+        ], 201);
     }
 
 
@@ -78,13 +78,15 @@ class AuthController extends Controller
 
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
             $token = $request->user()->createToken('auth_token')->plainTextToken;
 
             return response()->json([
                 'success' => true,
                 'message' => 'login berhasil',
                 'token' => $token,
-                'data' => Auth::user(),
+                'id' => $user->id,
+                'name' => $user->name,
             ], 200);
         }
 

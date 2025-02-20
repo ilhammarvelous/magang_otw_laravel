@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -31,6 +32,11 @@ class User extends Authenticatable
     public function isExpired()
     {
         return Carbon::now()->greaterThan($this->otp_expires_at);
+    }
+
+    public  function menus(): BelongsToMany
+    {
+        return $this->belongsToMany(Menu::class, 'user_menus', 'user_id', 'menu_id');
     }
 
     /**

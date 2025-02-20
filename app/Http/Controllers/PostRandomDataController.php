@@ -41,11 +41,10 @@ class PostRandomDataController extends Controller
 
                 Mahasiswa::insert($data);
 
-                $response = Http::withHeaders([
+                Http::withHeaders([
                     'Content-Type' => 'application/json',
                 ])->timeout(60)->post($url, $data);
 
-                // Http::timeout(60)->post($url, $data);
             }
             return response()->json([
                 'success' => true,
