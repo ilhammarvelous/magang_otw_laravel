@@ -116,20 +116,18 @@ class UserController extends Controller
         }
 
         $request->validate([
-            'name' => 'required',
+            'name' => 'string',
             'email' => 'required|email',
-            'no_wa' => 'required|numeric|regex:/^\d{10,14}$/',
-        ],[
-            'name.required' => 'Nama wajib diisi!',
+            'no_wa' => 'numeric|regex:/^\d{10,14}$/',
+        ], [
             'name.string' => 'Nama harus berupa teks!',
             'email.required' => 'Email wajib diisi!',
             'email.email' => 'Masukkan email yang benar!',
-            'no_wa.required' => 'Nomor WhatsApp wajib diisi!',
-            'no_wa.numeric' => 'Nomor WhatsApp harus berupa angka.',
-            'no_wa.regex' => 'Nomor WhatsApp harus terdiri dari 10 hingga 14 digit.',
+            'no_wa.numeric' => 'Nomor WhatsApp harus berupa angka!',
+            'no_wa.regex' => 'Nomor WhatsApp harus terdiri dari 10 hingga 14 digit!',
         ]);
 
-        if($request->password == ""){
+        if ($request->password == "") {
             $user->update([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -163,30 +161,30 @@ class UserController extends Controller
         //             'message' => 'ID tidak valid.',
         //         ], 400);
         //     }
-    
+
         //     if (auth()->id() === (int) $decrypt) {
         //         return response()->json([
         //             'success' => false,
         //             'message' => 'Tidak bisa menghapus akun anda sendiri.'
         //         ], 403);
         //     }
-    
+
         //     $user = User::find($decrypt);
-    
+
         //     if (!$user) {
         //         return response()->json([
         //             'success' => false,
         //             'message' => 'Data pengguna tidak ditemukan.',
         //         ], 404);
         //     }
-    
+
         //     $user->delete();
-    
+
         //     return response()->json([
         //         'success' => true,
         //         'message' => 'Data pengguna berhasil dihapus.',
         //     ], 200);
-    
+
         // } catch (\Exception $e) {
         //     return response()->json([
         //         'success' => false,

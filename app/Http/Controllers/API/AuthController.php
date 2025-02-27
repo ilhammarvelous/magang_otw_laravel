@@ -76,10 +76,13 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-
+        // $user = User::all();
+        
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             $token = $request->user()->createToken('auth_token')->plainTextToken;
+            // $allowedMenus = $user->menus()->pluck('menu')->toArray();
+
 
             return response()->json([
                 'success' => true,
@@ -87,6 +90,8 @@ class AuthController extends Controller
                 'token' => $token,
                 'id' => $user->id,
                 'name' => $user->name,
+                'whatsapp' => $user->no_wa,
+                'allowedMenus' => $user->menus()->pluck('menu')->toArray(),
             ], 200);
         }
 

@@ -61,7 +61,6 @@ class OTPController extends Controller
                 "message" => $message,
             ]);
 
-
             if ($response->failed()) {
                 return response()->json([
                     'success' => false,
@@ -75,7 +74,6 @@ class OTPController extends Controller
                 'message' => 'OTP dikirim ke WhatsApp anda.',
                 'whatsapp_response' => $response->json()
             ], 200);
-            
         } catch (Exception $e) {
             Log::error('Error kirim OTP: ' . $e->getMessage());
 
@@ -178,7 +176,7 @@ class OTPController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'OTP dikirim ulang ke WhatsApp.',
+            'message' => 'OTP dikirim ulang ke WhatsApp anda.',
             'whatsapp_response' => $response->json()
         ], 200);
     }

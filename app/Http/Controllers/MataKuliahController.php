@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Crypt;
 
 class MataKuliahController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $mataKuliahs = MataKuliah::paginate(10);
@@ -25,7 +22,7 @@ class MataKuliahController extends Controller
 
         $mataKuliahs->getCollection()->transform(function ($mk) {
             return [
-                'id' => Crypt::encryptString($mk->id), // 🔐 Enkripsi ID
+                'id' => Crypt::encryptString($mk->id),
                 'kode_mk' => $mk->kode_mk,
                 'nama_mk' => $mk->nama_mk,
                 'sks' => $mk->sks,
@@ -156,7 +153,6 @@ class MataKuliahController extends Controller
                 ], 404);
             }
 
-            // Hapus data
             $mataKuliah->delete();
 
             return response()->json([
